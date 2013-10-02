@@ -7,7 +7,7 @@ Don't forget our plugin is called vagrant-tiktalik so please adapt all commands 
 ```
 $ vagrant plugin install vagrant-tiktalik
 ...
-$ vagrant up --provider=tiktalik
+$ vagrant up --provider=tiktalik.com
 ```
 
 # Vagrant AWS Provider

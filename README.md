@@ -2,13 +2,13 @@
 
 Our plugin is based on excellent Vagrant AWS Provider plugin.
 We'll come up with our own README file but for now please read the original one provided below.
-Don't forget you that our plugin is called vagrant-tiktalik so please adapt commands accordingly.
+Don't forget our plugin is called vagrant-tiktalik so please adapt all commands accordingly.
 
-``
+```
 $ vagrant plugin install vagrant-tiktalik
 ...
 $ vagrant up --provider=tiktalik
-``
+```
 
 # Vagrant AWS Provider
 

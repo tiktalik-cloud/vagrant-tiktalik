@@ -1,84 +1,97 @@
-# This is Vagrant Tiktalik.com Provider WORK IN PROGRESS
+# Vagrant Tiktalik.com Provider
 
-Our plugin is based on excellent Vagrant AWS Provider plugin.
-We'll come up with our own README file but for now please read the original one provided below.
-Don't forget you that our plugin is called vagrant-tiktalik so please adapt commands accordingly.
-
-``
-$ vagrant plugin install vagrant-tiktalik
-...
-$ vagrant up --provider=tiktalik
-``
-
-# Vagrant AWS Provider
-
-This is a [Vagrant](http://www.vagrantup.com) 1.2+ plugin that adds an [AWS](http://aws.amazon.com)
-provider to Vagrant, allowing Vagrant to control and provision machines in
-EC2 and VPC.
+This is a [Vagrant](http://www.vagrantup.com) 1.2+ plugin that adds an [Tiktalik.com](https://tiktalik.com)
+provider to Vagrant, allowing Vagrant to control and provision machines in Tiktalik cloud.
 
 **NOTE:** This plugin requires Vagrant 1.2+,
 
 ## Features
 
-* Boot EC2 or VPC instances.
+* Boot Tiktalik instances.
 * SSH into the instances.
-* Provision the instances with any built-in Vagrant provisioner.
+* Provision the instances with any built-in Vagrant provisioner, ie. ansible
 * Minimal synced folder support via `rsync`.
-* Define region-specifc configurations so Vagrant can manage machines
-  in multiple regions.
 
 ## Usage
 
-Install using standard Vagrant 1.1+ plugin installation methods. After
-installing, `vagrant up` and specify the `aws` provider. An example is
-shown below.
+Install using standard Vagrant 1.1+ plugin installation methods.
 
 ```
-$ vagrant plugin install vagrant-aws
-...
-$ vagrant up --provider=aws
-...
+$ vagrant plugin install vagrant-tiktalik
+
+Installing the 'vagrant-tiktalik' plugin. This can take a few minutes...
+Installed the plugin 'vagrant-tiktalik (0.0.1)'!
 ```
 
-Of course prior to doing this, you'll need to obtain an AWS-compatible
+After installing, run `vagrant up` and specify the `tiktalik.com` provider.
+
+```
+$ vagrant up --provider=tiktalik.com
+
+Bringing machine 'default' up with 'tiktalik.com' provider...
+[default] Launching an instance with the following settings...
+[default]  -- Image: 4a2b3e72-47f1-4e88-b482-1834478ade28
+[default]  -- Hostname: vagrant-default
+[default]  -- Size: 0.5
+[default]  -- SSH key: d5c6b671-6cba-41fe-9020-5d5e1dda85f9
+[default]  -- Networks: ["212c7fd1-6018-41ff-9a01-a37956517237"]
+[default] Waiting for instance to become "ready"...
+[default] Waiting for SSH to become available...
+[default] Machine is booted and ready for use!
+[default] Rsyncing folder: /root/f/ => /vagrant
+```
+
+Of course prior to doing this, you'll need to obtain an Tiktalik-compatible
 box file for Vagrant.
 
 ## Quick Start
 
 After installing the plugin (instructions above), the quickest way to get
-started is to actually use a dummy AWS box and specify all the details
+started is to actually use a dummy Tiktalik box and specify all the details
 manually within a `config.vm.provider` block. So first, add the dummy
 box using any name you want:
 
 ```
-$ vagrant box add dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box
-...
+$ vagrant box add dummy https://github.com/tiktalik-cloud/vagrant-tiktalik/raw/master/box/tiktalik.box
+
+Downloading or copying the box...
+Extracting box...e: 0/s, Estimated time remaining: --:--:--)
+Successfully added box 'dummy' with provider 'tiktalik.com'!
 ```
 
 And then make a Vagrantfile that looks like the following, filling in
 your information where necessary.
 
-```
-Vagrant.configure("2") do |config|
-  config.vm.box = "dummy"
+```ruby
+Vagrant.configure('2') do |config|
+  config.vm.provider :"tiktalik.com" do |provider, override|
+    # path to private ssh key, public one has to me uploaded to
+    # tiktalik.com and it's UUID provided below as `provider.ssh_key`
+    override.ssh.private_key_path = '~/.ssh/id_dsa'
 
-  config.vm.provider :aws do |aws, override|
-    aws.access_key_id = "YOUR KEY"
-    aws.secret_access_key = "YOUR SECRET KEY"
-    aws.keypair_name = "KEYPAIR NAME"
+    override.vm.box = 'tiktalik'
 
-    aws.ami = "ami-7747d01e"
+    # hostname for your instance, ie vagrant-host.youraccount.p2.tiktalik.com
+    # override.vm.hostname = 'vagrant-host'
 
-    override.ssh.username = "ubuntu"
-    override.ssh.private_key_path = "PATH TO YOUR PRIVATE KEY"
+    # api credentials, get them from https://tiktalik.com/panel/#apikeys
+    provider.api_key = 'api key'
+    provider.api_secret = 'api secret'
+
+    # system image UUID, this one is for Ubuntu 12.04.3 LTS 64-bit
+    # get more ids from https://tiktalik.com/panel/#templates
+    provider.image = '4a2b3e72-47f1-4e88-b482-1834478ade28'
+
+    # your SSH key UUID, get one from https://tiktalik.com/panel/#sshkeys
+    provider.ssh_key = 'here goes ssh key uuid'
   end
 end
 ```
 
-And then run `vagrant up --provider=aws`.
+And then run `vagrant up --provider=tiktalik.com`.
 
-This will start an Ubuntu 12.04 instance in the us-east-1 region within
-your account. And assuming your SSH information was filled in properly
+This will start an Ubuntu 12.04 instance within your account.
+And assuming your SSH information was filled in properly
 within your Vagrantfile, SSH and provisioning will work as well.
 
 Note that normally a lot of this boilerplate is encoded within the box
@@ -88,143 +101,41 @@ no preconfigured defaults.
 If you have issues with SSH connecting, make sure that the instances
 are being launched with a security group that allows SSH access.
 
-## Box Format
-
-Every provider in Vagrant must introduce a custom box format. This
-provider introduces `aws` boxes. You can view an example box in
-the [example_box/ directory](https://github.com/mitchellh/vagrant-aws/tree/master/example_box).
-That directory also contains instructions on how to build a box.
-
-The box format is basically just the required `metadata.json` file
-along with a `Vagrantfile` that does default settings for the
-provider-specific configuration for this provider.
-
 ## Configuration
 
 This provider exposes quite a few provider-specific configuration options:
 
-* `access_key_id` - The access key for accessing AWS
-* `ami` - The AMI id to boot, such as "ami-12345678"
-* `availability_zone` - The availability zone within the region to launch
-  the instance. If nil, it will use the default set by Amazon.
-* `instance_ready_timeout` - The number of seconds to wait for the instance
-  to become "ready" in AWS. Defaults to 120 seconds.
-* `instance_type` - The type of instance, such as "m1.small". The default
-  value of this if not specified is "m1.small".
-* `keypair_name` - The name of the keypair to use to bootstrap AMIs
-   which support it.
-* `private_ip_address` - The private IP address to assign to an instance
-  within a [VPC](http://aws.amazon.com/vpc/)
-* `region` - The region to start the instance in, such as "us-east-1"
-* `secret_access_key` - The secret access key for accessing AWS
-* `security_groups` - An array of security groups for the instance. If this
-  instance will be launched in VPC, this must be a list of security group
-  IDs.
-* `subnet_id` - The subnet to boot the instance into, for VPC.
-* `tags` - A hash of tags to set on the machine.
-* `use_iam_profile` - If true, will use [IAM profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
-  for credentials.
-
-These can be set like typical provider-specific configuration:
-
-```ruby
-Vagrant.configure("2") do |config|
-  # ... other stuff
-
-  config.vm.provider :aws do |aws|
-    aws.access_key_id = "foo"
-    aws.secret_access_key = "bar"
-  end
-end
-```
-
-In addition to the above top-level configs, you can use the `region_config`
-method to specify region-specific overrides within your Vagrantfile. Note
-that the top-level `region` config must always be specified to choose which
-region you want to actually use, however. This looks like this:
-
-```ruby
-Vagrant.configure("2") do |config|
-  # ... other stuff
-
-  config.vm.provider :aws do |aws|
-    aws.access_key_id = "foo"
-    aws.secret_access_key = "bar"
-    aws.region = "us-east-1"
-
-    # Simple region config
-    aws.region_config "us-east-1", :ami => "ami-12345678"
-
-    # More comprehensive region config
-    aws.region_config "us-west-2" do |region|
-      region.ami = "ami-87654321"
-      region.keypair_name = "company-west"
-    end
-  end
-end
-```
-
-The region-specific configurations will override the top-level
-configurations when that region is used. They otherwise inherit
-the top-level configurations, as you would probably expect.
+* `image` - System image UUID, full list available at:
+  https://tiktalik.com/panel/#templates
+* `size` - Instance size, ie. 0.25, 0.5, 1, ...
+  Check out our pricing list for other sizes:
+  https://tiktalik.com/pricing#unit/2
+* `ssh_key` - SSH key UUID.  Key has to be uploaded beforehand.
+  Admin panel URL is https://tiktalik.com/panel/#sshkeys
+* `api_key` - API key and ...
+* `api_secret` - ... secret are required API creditentials.
+  Go to admin panel to get them: https://tiktalik.com/panel/#apikeys
 
 ## Networks
 
 Networking features in the form of `config.vm.network` are not
-supported with `vagrant-aws`, currently. If any of these are
+supported with `vagrant-tiktalik`, currently. If any of these are
 specified, Vagrant will emit a warning, but will otherwise boot
-the AWS machine.
+the Tiktalik instance.
 
 ## Synced Folders
 
 There is minimal support for synced folders. Upon `vagrant up`,
-`vagrant reload`, and `vagrant provision`, the AWS provider will use
+`vagrant reload`, and `vagrant provision`, the Tiktalik provider will use
 `rsync` (if available) to uni-directionally sync the folder to
 the remote machine over SSH.
 
 This is good enough for all built-in Vagrant provisioners (shell,
 chef, and puppet) to work!
 
-## Other Examples
-
-### Tags
-
-To use tags, simply define a hash of key/value for the tags you want to associate to your instance, like:
-
-```ruby
-Vagrant.configure("2") do |config|
-  # ... other stuff
-
-  config.vm.provider "aws" do |aws|
-    aws.tags = {
-	  'Name' => 'Some Name',
-	  'Some Key' => 'Some Value'
-    }
-  end
-end
-```
-
-### User data
-
-You can specify user data for the instance being booted.
-
-```ruby
-Vagrant.configure("2") do |config|
-  # ... other stuff
-
-  config.vm.provider "aws" do |aws|
-    # Option 1: a single string
-    aws.user_data = "#!/bin/bash\necho 'got user data' > /tmp/user_data.log\necho"
-
-    # Option 2: use a file
-    aws.user_data = File.read("user_data.txt")
-  end
-end
-```
-
 ## Development
 
-To work on the `vagrant-aws` plugin, clone this repository out, and use
+To work on the `vagrant-tiktalik` plugin, clone this repository out, and use
 [Bundler](http://gembundler.com) to get the dependencies:
 
 ```
@@ -242,9 +153,13 @@ the plugin without installing it into your Vagrant environment by just
 creating a `Vagrantfile` in the top level of this directory (it is gitignored)
 and add the following line to your `Vagrantfile` 
 ```ruby
-Vagrant.require_plugin "vagrant-aws"
+Vagrant.require_plugin "vagrant-tiktalik"
 ```
 Use bundler to execute Vagrant:
 ```
-$ bundle exec vagrant up --provider=aws
+$ bundle exec vagrant up --provider=tiktalik.com
 ```
+
+## Thanks
+
+Our plugin is based on excellent Vagrant AWS Provider plugin.

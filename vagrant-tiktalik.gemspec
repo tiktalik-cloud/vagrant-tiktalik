@@ -7,9 +7,10 @@ Gem::Specification.new do |s|
   s.platform      = Gem::Platform::RUBY
   s.authors       = "Aleksander Piotrowski"
   s.email         = "alek@nic.com.pl"
-  s.homepage      = "http://www.tiktalik.com"
-  s.summary       = "Enables Vagrant to manage machines in Tiktalik.com Clound."
-  s.description   = "Enables Vagrant to manage machines in Tiktalik.com Clound."
+  s.homepage      = "https://www.tiktalik.com"
+  s.summary       = "A Vagrant provider plugin that supports the management of Tiktalik.com instances."
+  s.description   = "Enables Vagrant to manage machines in Tiktalik.com Cloud."
+  s.license       = 'MIT'
 
   s.required_rubygems_version = ">= 1.3.6"
   s.rubyforge_project         = "vagrant-tiktalik"

@@ -44,6 +44,30 @@ Bringing machine 'default' up with 'tiktalik.com' provider...
 Of course prior to doing this, you'll need to obtain an Tiktalik-compatible
 box file for Vagrant.
 
+## SSL issues
+
+If you get the following error:
+
+```
+connect': SSL_connect returned=1 errno=0 state=SSLv3 read server certificate B: certificate verify failed (Faraday::Error::ConnectionFailed)
+```
+
+It means that you are missing root certificates, at least ruby is missing them.
+
+This problem has been described on Faraday's (a vagrant-tiktalik and tiktalik-ruby dependency) wiki:
+
+[https://github.com/lostisland/faraday/wiki/Setting-up-SSL-certificates](https://github.com/lostisland/faraday/wiki/Setting-up-SSL-certificates)
+
+The quick fix is to:
+
+ * set SSL_CERT_FILE environment variable and point it to Certificate Authority (CA) file. Please note that CA file might not be installed on your system and the actuall file path might differ!
+ 
+   ```
+   $ SSL_CERT_FILE=/opt/vagrant/embedded/cacert.pem vagrant status
+   ```
+ * set CA file path as a provider configuration variable in Vagrantfile.  Please see sample configuration file below.
+
+
 ## Quick Start
 
 After installing the plugin (instructions above), the quickest way to get
@@ -81,6 +105,11 @@ Vagrant.configure('2') do |config|
     # system image UUID, this one is for Ubuntu 12.04.3 LTS 64-bit
     # get more ids from https://tiktalik.com/panel/#templates
     provider.image = '4a2b3e72-47f1-4e88-b482-1834478ade28'
+    
+    # in case of SSL related problems (ie. ruby 1.9 missing CA file)
+    # uncomment following line. don't forget to provide valid CA file path.
+    # on Ubuntu, CA file comes with Vagrant deb package
+    # provider.ca_file = '/opt/vagrant/embedded/cacert.pem'
 
     # your SSH key UUID, get one from https://tiktalik.com/panel/#sshkeys
     provider.ssh_key = 'here goes ssh key uuid'

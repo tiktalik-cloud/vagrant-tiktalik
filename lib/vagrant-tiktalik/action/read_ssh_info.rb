@@ -24,6 +24,7 @@ module VagrantPlugins
           t = Tiktalik
           t.api_key = @config.api_key
           t.api_secret_key = @config.api_secret
+          t.ca_file = @config.ca_file
 
           i = Tiktalik::Computing::Instance
           instance = i.find machine.id

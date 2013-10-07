@@ -8,6 +8,7 @@ module VagrantPlugins
       attr_accessor :size
       attr_accessor :ssh_key
       attr_accessor :api_secret
+      attr_accessor :ca_file
       #attr_accessor :network
 
       def initialize
@@ -16,6 +17,7 @@ module VagrantPlugins
         @size       = UNSET_VALUE
         @ssh_key    = UNSET_VALUE
         @api_secret = UNSET_VALUE
+        @ca_file    = UNSET_VALUE
         #@network    = UNSET_VALUE
       end
 
@@ -25,6 +27,7 @@ module VagrantPlugins
         @size       = 0.5 if @size == UNSET_VALUE
         @ssh_key    = nil if @ssh_key == UNSET_VALUE
         @api_secret = ENV['TIKTALIK_API_SECRET'] if @api_secret == UNSET_VALUE
+        @ca_file    = nil if @ca_file == UNSET_VALUE
         #@network    = nil if @network == UNSET_VALUE
       end
 

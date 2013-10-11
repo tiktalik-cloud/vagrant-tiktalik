@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project         = "vagrant-tiktalik"
 
   # s.add_runtime_dependency "fog", "~> 1.10.0"
-  s.add_runtime_dependency "tiktalik", "~> 1.0.3"
+  s.add_runtime_dependency "tiktalik", "~> 1.0.4"
 
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec-core", "~> 2.12.2"

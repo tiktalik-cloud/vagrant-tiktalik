@@ -23,12 +23,12 @@ Installing the 'vagrant-tiktalik' plugin. This can take a few minutes...
 Installed the plugin 'vagrant-tiktalik (0.0.1)'!
 ```
 
-After installing, run `vagrant up` and specify the `tiktalik.com` provider.
+After installing, run `vagrant up` and specify the `tiktalik` provider.
 
 ```
-$ vagrant up --provider=tiktalik.com
+$ vagrant up --provider=tiktalik
 
-Bringing machine 'default' up with 'tiktalik.com' provider...
+Bringing machine 'default' up with 'tiktalik' provider...
 [default] Launching an instance with the following settings...
 [default]  -- Image: 4a2b3e72-47f1-4e88-b482-1834478ade28
 [default]  -- Hostname: vagrant-default
@@ -80,7 +80,7 @@ $ vagrant box add dummy https://github.com/tiktalik-cloud/vagrant-tiktalik/raw/m
 
 Downloading or copying the box...
 Extracting box...e: 0/s, Estimated time remaining: --:--:--)
-Successfully added box 'dummy' with provider 'tiktalik.com'!
+Successfully added box 'dummy' with provider 'tiktalik'!
 ```
 
 And then make a Vagrantfile that looks like the following, filling in
@@ -88,10 +88,11 @@ your information where necessary.
 
 ```ruby
 Vagrant.configure('2') do |config|
-  config.vm.provider :"tiktalik.com" do |provider, override|
+  config.vm.provider :tiktalik do |provider, override|
     # path to private ssh key, public one has to me uploaded to
     # tiktalik.com and it's UUID provided below as `provider.ssh_key`
-    override.ssh.private_key_path = '~/.ssh/id_dsa'
+    # please note that DSA key will work just fine
+    override.ssh.private_key_path = '~/.ssh/id_rsa'
 
     override.vm.box = 'tiktalik'
 
@@ -117,7 +118,7 @@ Vagrant.configure('2') do |config|
 end
 ```
 
-And then run `vagrant up --provider=tiktalik.com`.
+And then run `vagrant up --provider=tiktalik`.
 
 This will start an Ubuntu 12.04 instance within your account.
 And assuming your SSH information was filled in properly
@@ -186,7 +187,7 @@ Vagrant.require_plugin "vagrant-tiktalik"
 ```
 Use bundler to execute Vagrant:
 ```
-$ bundle exec vagrant up --provider=tiktalik.com
+$ bundle exec vagrant up --provider=tiktalik
 ```
 
 ## Thanks

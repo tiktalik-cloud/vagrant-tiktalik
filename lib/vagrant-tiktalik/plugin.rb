@@ -19,12 +19,12 @@ module VagrantPlugins
       machines in Tiktalik.com.
       DESC
 
-      config(:"tiktalik.com", :provider) do
+      config(:tiktalik, :provider) do
         require_relative "config"
         Config
       end
 
-      provider(:"tiktalik.com", parallel: true) do
+      provider(:tiktalik, parallel: true) do
         # Setup logging and i18n
         setup_logging
         setup_i18n

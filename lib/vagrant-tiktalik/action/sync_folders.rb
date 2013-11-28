@@ -44,11 +44,16 @@ module VagrantPlugins
             env[:machine].communicate.sudo(
               "chown #{ssh_info[:username]} '#{guestpath}'")
 
+            ssh_command = "ssh -p #{ssh_info[:port]} -o StrictHostKeyChecking=no -i '#{ssh_info[:private_key_path]}'"
+
+            # support config.ssh.proxy_command
+            ssh_command += " -o ProxyCommand='#{env[:machine].config.ssh.proxy_command}'" if env[:machine].config.ssh.proxy_command
+
             # Rsync over to the guest path using the SSH info
             command = [
               "rsync", "--verbose", "--archive", "-z",
               "--exclude", ".vagrant/",
-              "-e", "ssh -p #{ssh_info[:port]} -o StrictHostKeyChecking=no -i '#{ssh_info[:private_key_path]}'",
+              "-e", ssh_command,
               hostpath,
               "#{ssh_info[:username]}@#{ssh_info[:host]}:#{guestpath}"]
 

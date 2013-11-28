@@ -50,8 +50,16 @@ module VagrantPlugins
 
             n = Tiktalik::Computing::Network
             n.all.each do |network|
-              (networks.push network.uuid.to_s) if network.public
-              break if network.public
+              uuid = network.uuid.to_s
+              name = network.name.to_s
+              if @config.networks
+                (networks.push uuid) if
+                  @config.networks.include?(uuid) or
+                  @config.networks.include?(name)
+              else
+                (networks.push uuid) if network.public
+                break if network.public
+              end
             end
 
             env[:ui].info(" -- Networks: #{networks}")

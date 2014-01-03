@@ -41,6 +41,9 @@ module VagrantPlugins
             ip = iface.ip if iface.network.public == true
           end
 
+          # no public interfaces found, give a first private one
+          ip = instance.interfaces[0].ip if ip.nil?
+
           # Read the DNS info
           return {
             :host => ip,
